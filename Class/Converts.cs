@@ -6,8 +6,7 @@ namespace Conversion.Class
     public class Converts
 
     {
-        [Key]
-        public int IDTransaction { get; set; }
+        [Key] public int IDTransaction { get; set; }
 
         public int IDUser { get; set; }
 
@@ -22,7 +21,5 @@ namespace Conversion.Class
         public double Rate { get; set; }
 
         public DateTime Date_Time { get; set; }
-
-
     }
 }

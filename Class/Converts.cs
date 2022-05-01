@@ -13,11 +13,11 @@ namespace Conversion.Class
 
         public string CurrencyOrigin { get; set; }
 
-        public decimal OriginValue { get; set; }
+        public double OriginValue { get; set; }
 
         public string DestCurrency { get; set; }
 
-        public decimal DestValue { get; set; }
+        public double DestValue { get; set; }
 
         public double Rate { get; set; }
 

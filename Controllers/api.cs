@@ -58,9 +58,9 @@ namespace Conversion.Controllers
             try
             {
 
-                var verifica = _userservice.Check(users);
+                var contain = _userservice.Check(users);
 
-                if (verifica)
+                if (contain)
                 {
                     return BadRequest("This user already exists.");
                 }
@@ -83,14 +83,13 @@ namespace Conversion.Controllers
 
 
 
-        [HttpGet("Consult/User/{IDUser}/{CurrencyOrigin}/{orvalue}/{DestCurrency}/{destvalue}")] //Check the coin bringing its rate, this part still needs to be finished
-        public async Task<IActionResult> GetCoin(int IDUser, string CurrencyOrigin, decimal orvalue, string DestCurrency, decimal destvalue)
+        [HttpPost("Consult/User/{IDUser}/{CurrencyOrigin}/{orvalue}/{DestCurrency}")] //Check the currency by bringing your rate and convert it to the chosen currency ex:   2 *  1.054463 /  5.243579 = 0.4021920905549434 (BRL >> USD)
+        public async Task<IActionResult> GetCoin(int IDUser, string CurrencyOrigin, double orvalue, string DestCurrency)
         {
             try
             {
-                var retorno = await _convertservices.GetRateCoin();
+                var coinrate = await _convertservices.GetRateCoin();
 
-                //1.054463
 
 
                 var users = await _context.Users.AsNoTracking().Where(w => w.IDUser == IDUser).ToListAsync();
@@ -103,19 +102,64 @@ namespace Conversion.Controllers
 
                 var registercoin = new Converts();
 
-                var indice = retorno["rates"]["USD"];
+                var valuei1 = 0.00;
+
+                var valuei2 = 0.00;
+
+                switch (CurrencyOrigin)
+                {
+                    case "EUR":
+                        valuei1 = coinrate["rates"][CurrencyOrigin];
+                        break;
+
+                    case "BRL":
+                        valuei1 = coinrate["rates"][CurrencyOrigin];
+                        break;
+
+                    case "USD":
+                        valuei1 = coinrate["rates"][CurrencyOrigin];
+                        break;
+
+                    case "JPY":
+                        valuei1 = coinrate["rates"][CurrencyOrigin];
+                        break;
+                }
+
+
+                switch (DestCurrency)
+                {
+                    case "EUR":
+                        valuei2 = coinrate["rates"][DestCurrency];
+                        break;
+
+                    case "BRL":
+                        valuei2 = coinrate["rates"][DestCurrency];
+                        break;
+
+                    case "USD":
+                        valuei2 = coinrate["rates"][DestCurrency];
+                        break;
+
+                    case "JPY":
+                        valuei2 = coinrate["rates"][DestCurrency];
+                        break;
+                }
+
+
 
                 registercoin.IDUser = IDUser;
 
                 registercoin.CurrencyOrigin = CurrencyOrigin;
 
-                registercoin.Rate = indice;
+                registercoin.Rate = valuei1;
 
                 registercoin.OriginValue = orvalue;
 
                 registercoin.DestCurrency = DestCurrency;
 
-                registercoin.DestValue = destvalue;
+                var calculation = orvalue * valuei2 / valuei1;
+
+                registercoin.DestValue = calculation;
 
                 registercoin.Date_Time = DateTime.Now;
 
@@ -124,7 +168,7 @@ namespace Conversion.Controllers
                 var register = await _convertrepository.InsertAsync(registercoin);
 
 
-                return Ok(registercoin);
+                return Ok(calculation);
             }
             catch (Exception ex)
             {

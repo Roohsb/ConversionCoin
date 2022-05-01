@@ -1,12 +1,11 @@
-﻿using Conversion.Class;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Conversion.Class;
 using Conversion.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Conversion.Controllers
 {
@@ -16,17 +15,18 @@ namespace Conversion.Controllers
     {
         private readonly Context _context;
 
+        private readonly ConvertRepository _convertrepository;
+
         private readonly ConvertServices _convertservices;
 
         private readonly ILogger<api> _logger;
 
-        private readonly UsersRepository _usersrepository;
-
-        private readonly ConvertRepository _convertrepository;
-
         private readonly UsersService _userservice;
 
-        public api(ILogger<api> logger, Context context, ConvertServices convertservices, UsersRepository usersrepository, UsersService usersservice, ConvertRepository convertrepository)
+        private readonly UsersRepository _usersrepository;
+
+        public api(ILogger<api> logger, Context context, ConvertServices convertservices,
+            UsersRepository usersrepository, UsersService usersservice, ConvertRepository convertrepository)
         {
             _logger = logger;
 
@@ -57,7 +57,6 @@ namespace Conversion.Controllers
         {
             try
             {
-
                 var contain = _userservice.Check(users);
 
                 if (contain)
@@ -77,19 +76,16 @@ namespace Conversion.Controllers
 
                 return Problem(ex.Message, "Unable to register the user. ", 500); // new Exception(ex.Message);
             }
-
         }
 
 
-
-
-        [HttpPost("Consult/User/{IDUser}/{CurrencyOrigin}/{orvalue}/{DestCurrency}")] //Check the currency by bringing your rate and convert it to the chosen currency ex:   2 *  1.054463 /  5.243579 = 0.4021920905549434 (BRL >> USD)
+        [HttpPost(
+            "Consult/User/{IDUser}/{CurrencyOrigin}/{orvalue}/{DestCurrency}")] //Check the currency by bringing your rate and convert it to the chosen currency ex:   2 *  1.054463 /  5.243579 = 0.4021920905549434 (BRL >> USD)
         public async Task<IActionResult> GetCoin(int IDUser, string CurrencyOrigin, double orvalue, string DestCurrency)
         {
             try
             {
                 var coinrate = await _convertservices.GetRateCoin();
-
 
 
                 var users = await _context.Users.AsNoTracking().Where(w => w.IDUser == IDUser).ToListAsync();
@@ -146,7 +142,6 @@ namespace Conversion.Controllers
                 }
 
 
-
                 registercoin.IDUser = IDUser;
 
                 registercoin.CurrencyOrigin = CurrencyOrigin;
@@ -164,7 +159,6 @@ namespace Conversion.Controllers
                 registercoin.Date_Time = DateTime.Now;
 
 
-
                 var register = await _convertrepository.InsertAsync(registercoin);
 
 
@@ -176,7 +170,6 @@ namespace Conversion.Controllers
 
                 return Problem(ex.Message, "Error performing currency conversion. ", 500); // new Exception(ex.Message);
             }
-
         }
     }
 }
